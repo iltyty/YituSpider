@@ -2,6 +2,7 @@ import json
 import time
 
 from child import Child
+from util import save_to_excel
 
 from lxml import etree
 from selenium import webdriver
@@ -12,6 +13,7 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support import expected_conditions as EC
 
 
+BASE_URL = 'https://medical-saas.yitutech.com/'
 START_URL = 'https://medical-saas.yitutech.com/boneage/#/'
 
 USERNAME = 'szet@boneageyitiji'
@@ -86,14 +88,8 @@ def get_all_detail_urls(driver: WebDriver) -> list[str]:
 
 
 def get_all_urls_from_file(filename='urls.txt'):
-    res: list[str] = []
-
     with open(filename, 'r') as f:
-        line = f.readline()
-        res.append(line)
-
-    return res
-
+        return f.readlines()
 
 
 def init_driver() -> WebDriver:
@@ -106,19 +102,29 @@ def init_driver() -> WebDriver:
     return webdriver.Chrome()
 
 
+def handle_exception(url: str):
+    with open('log.txt', 'w') as f:
+        f.write('{}\n'.format(str))
+
+
 def get_all_children(browser: WebDriver, urls: list[str]):
     res: list[Child] = []
 
     for url in urls:
         url = url.strip()
         browser.get(url)
-        child = get_one_child(browser)
+        try:
+            child = get_one_child(browser)
+        except Exception:
+            handle_exception(url)
+        print(child)
         res.append(child)
 
     return res
 
 
 def get_one_child(browser: WebDriver):
+    time.sleep(8)
     tree = etree.HTML(browser.page_source)
 
     name = tree.xpath(Child.NAME_XPATH)[0].strip()
@@ -128,6 +134,21 @@ def get_one_child(browser: WebDriver):
     age = tree.xpath(Child.AGE_XPATH)[0].strip()
     date = tree.xpath(Child.DATE_XPATH)[0].strip()
 
+    rus_bone = tree.xpath(Child.RUS_BONE_XPATH)[0]
+    rus_bone = ''.join(rus_bone.itertext())
+    c_bone = tree.xpath(Child.C_BONE_XPATH)[0]
+    c_bone = ''.join(c_bone.itertext())
+
+    browser.execute_script('document.querySelector("{}").click()'.format(Child.ZH_BTN_SELECTOR))
+    tree = etree.HTML(browser.page_source)
+    zh_bone = tree.xpath(Child.ZH_BONE_XPATH)[0]
+    zh_bone = ''.join(zh_bone.itertext())
+
+    browser.execute_script('document.querySelector("{}").click()'.format(Child.IMG_BTN_SELECTOR))
+    tree = etree.HTML(browser.page_source)
+    img_bone = tree.xpath(Child.IMG_BONE_XPATH)[0]
+    img_bone = ''.join(img_bone.itertext())
+
     return Child(
         name=name,
         exam_id=exam_id,
@@ -135,18 +156,22 @@ def get_one_child(browser: WebDriver):
         child_id=child_id,
         age=age,
         date=date,
-        rus_bone='',
-        c_bone='',
-        zh_bone='',
-        img_bone=''
+        rus_bone=rus_bone,
+        c_bone=c_bone,
+        zh_bone=zh_bone,
+        img_bone=img_bone
     )
 
 
 def main():
     browser = init_driver()
+    browser.get(BASE_URL)
+    login(browser)
+
     # urls = get_all_detail_urls(browser)
-    urls = get_all_urls_from_file()
+    urls = get_all_urls_from_file()[400:]
     res = get_all_children(browser, urls)
+    save_to_excel(res, 'res.xlsx')
 
 
 main()
