@@ -38,6 +38,7 @@ def login(driver: WebDriver):
 
     btn = driver.find_element_by_xpath('//button')
     btn.click()
+    time.sleep(3)
 
     save_cookie(driver.get_cookies()[0])
 
@@ -59,7 +60,7 @@ def get_all_detail_urls(driver: WebDriver) -> list[str]:
     DETAIL_XPATH = '//div[@class="ant-table-body"]//tbody//tr'
     NEXT_BTN_XPATH = '//li[@class=" ant-pagination-next"]//a[@class="ant-pagination-item-link"]'
 
-    for _ in range(49):
+    for _ in range(124):
         _ = WebDriverWait(driver, 5, 1).until(
             EC.presence_of_element_located((By.XPATH, DETAIL_XPATH))
         )
@@ -113,19 +114,26 @@ def get_all_children(browser: WebDriver, urls: list[str]):
     for url in urls:
         url = url.strip()
         browser.get(url)
+        child = None
         try:
-            child = get_one_child(browser)
+            child = get_one_child(browser, url)
         except Exception:
             handle_exception(url)
-        print(child)
-        res.append(child)
+        # print(child)
+        if child:
+            res.append(child)
 
     return res
 
 
-def get_one_child(browser: WebDriver):
+def get_one_child(browser: WebDriver, url: str):
     time.sleep(8)
     tree = etree.HTML(browser.page_source)
+
+    lack = tree.xpath(Child.LACK_XPATH)
+    if len(lack) != 0 and '缺失' in lack[0]:
+        with open('lack.txt', 'w') as f:
+            f.write('{}\n'.format(url))
 
     name = tree.xpath(Child.NAME_XPATH)[0].strip()
     exam_id = tree.xpath(Child.EXAM_ID_XPATH)[0].strip()
@@ -169,7 +177,7 @@ def main():
     login(browser)
 
     # urls = get_all_detail_urls(browser)
-    urls = get_all_urls_from_file()[400:]
+    urls = get_all_urls_from_file()[:10]
     res = get_all_children(browser, urls)
     save_to_excel(res, 'res.xlsx')
 
