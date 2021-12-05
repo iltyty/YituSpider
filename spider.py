@@ -81,7 +81,7 @@ def get_all_detail_urls(driver: WebDriver) -> list[str]:
 
         time.sleep(2)
 
-    with open('urls.txt', 'w') as f:
+    with open('urls.txt', 'a') as f:
         for url in res:
             f.write('{}\n'.format(url))
 
@@ -134,6 +134,7 @@ def get_one_child(browser: WebDriver, url: str):
     if len(lack) != 0 and '缺失' in lack[0]:
         with open('lack.txt', 'a') as f:
             f.write('{}\n'.format(url))
+        return None
 
     name = tree.xpath(Child.NAME_XPATH)[0].strip()
     exam_id = tree.xpath(Child.EXAM_ID_XPATH)[0].strip()
@@ -177,7 +178,7 @@ def main():
     login(browser)
 
     # urls = get_all_detail_urls(browser)
-    urls = get_all_urls_from_file()[100:150]
+    urls = get_all_urls_from_file()[150:300]
     res = get_all_children(browser, urls)
     save_to_excel(res, 'res.xlsx')
 
