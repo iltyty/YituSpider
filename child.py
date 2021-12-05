@@ -1,5 +1,5 @@
 class Child:
-    LACK_XPATH = '//*[@id="root"]/div/div[2]/div[1]/div[1]/div/div/div[1]/div[2]/div/div[1]'
+    LACK_XPATH = '//div[@class="ThumbnailItem__imageDesc"]/text()'
 
     BASE_XPATH = '//div[@class="DicomViewer__info--topLeft"]//ul/li'
     NAME_XPATH = BASE_XPATH + '[1]/text()'

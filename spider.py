@@ -105,7 +105,7 @@ def init_driver() -> WebDriver:
 
 def handle_exception(url: str):
     with open('log.txt', 'w') as f:
-        f.write('{}\n'.format(str))
+        f.write('{}\n'.format(url))
 
 
 def get_all_children(browser: WebDriver, urls: list[str]):
@@ -119,7 +119,7 @@ def get_all_children(browser: WebDriver, urls: list[str]):
             child = get_one_child(browser, url)
         except Exception:
             handle_exception(url)
-        # print(child)
+        print(child)
         if child:
             res.append(child)
 
@@ -177,7 +177,8 @@ def main():
     login(browser)
 
     # urls = get_all_detail_urls(browser)
-    urls = get_all_urls_from_file()[:10]
+    urls = get_all_urls_from_file()[20:50]
+    urls = ['https://medical-saas.yitutech.com/boneage/#/result/071626b2-5256-11ec-b5cc-52d14eb3dbc3']
     res = get_all_children(browser, urls)
     save_to_excel(res, 'res.xlsx')
 
