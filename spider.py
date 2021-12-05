@@ -119,7 +119,7 @@ def get_all_children(browser: WebDriver, urls: list[str]):
             child = get_one_child(browser, url)
         except Exception:
             handle_exception(url)
-        print(child)
+        # print(child)
         if child:
             res.append(child)
 
@@ -132,7 +132,7 @@ def get_one_child(browser: WebDriver, url: str):
 
     lack = tree.xpath(Child.LACK_XPATH)
     if len(lack) != 0 and '缺失' in lack[0]:
-        with open('lack.txt', 'w') as f:
+        with open('lack.txt', 'a') as f:
             f.write('{}\n'.format(url))
 
     name = tree.xpath(Child.NAME_XPATH)[0].strip()
@@ -177,8 +177,7 @@ def main():
     login(browser)
 
     # urls = get_all_detail_urls(browser)
-    urls = get_all_urls_from_file()[20:50]
-    urls = ['https://medical-saas.yitutech.com/boneage/#/result/071626b2-5256-11ec-b5cc-52d14eb3dbc3']
+    urls = get_all_urls_from_file()[70:100]
     res = get_all_children(browser, urls)
     save_to_excel(res, 'res.xlsx')
 
