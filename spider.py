@@ -178,7 +178,7 @@ def main():
     login(browser)
 
     # urls = get_all_detail_urls(browser)
-    urls = get_all_urls_from_file()[150:300]
+    urls = get_all_urls_from_file()[300:500]
     res = get_all_children(browser, urls)
     save_to_excel(res, 'res.xlsx')
 
